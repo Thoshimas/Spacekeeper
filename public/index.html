@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- Design context: a real, local Windows utility; warm beige, sage and terracotta.
+     One workspace, no external fonts/assets, clear provenance for all disk data.
+     Large storage map + dense file table; protection and confirmation stay visible. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spacekeeper · 空間管家</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true"><defs>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></symbol>
+    <symbol id="i-disk" viewBox="0 0 24 24"><path d="m5 4-3 11v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4L19 4Z"></path><path d="M2 15h20M16 18h.01M19 18h.01"></path></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"></path><path d="m8 12 3 3 5-6"></path></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"></path></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"></path></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"></path></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1"></path></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"></circle><path d="m15 15 6 6"></path></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"></path></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L21 7l-5-5ZM13 5l6 6"></path></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8ZM14 3v5h5M8 13h8M8 17h5"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 3h7v7m-1-6-9 9M10 4H4v16h16v-6"></path></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7h.01"></path></symbol>
+  </defs></svg>
+  <aside class="sidebar">
+    <a class="brand" href="#" aria-label="Spacekeeper 首頁"><span class="brand-mark"><svg class="icon"><use href="#i-grid"></use></svg></span><span>Spacekeeper<small>空 間 管 家</small></span></a>
+    <div class="nav-label">你的工作空間</div>
+    <nav aria-label="主導覽">
+      <button class="nav-item active" data-view="overview"><svg class="icon"><use href="#i-grid"></use></svg>空間總覽<span class="nav-dot"></span></button>
+      <button class="nav-item" data-view="suggestions"><svg class="icon"><use href="#i-spark"></use></svg>清理建議<span class="nav-count" id="suggestionCount">—</span></button>
+      <button class="nav-item" data-view="protected"><svg class="icon"><use href="#i-shield"></use></svg>固定保護</button>
+      <button class="nav-item" data-view="history"><svg class="icon"><use href="#i-clock"></use></svg>操作紀錄</button>
+    </nav>
+    <div class="nav-label disk-label">本機磁碟<button id="refreshDrives" class="icon-button" title="更新磁碟容量" aria-label="更新磁碟容量"><svg class="icon"><use href="#i-refresh"></use></svg></button></div>
+    <div id="drives" class="drives"><span class="muted">讀取磁碟中…</span></div>
+    <div class="sidebar-bottom">
+      <div class="protection-note"><svg class="icon"><use href="#i-shield"></use></svg><strong>為重要檔案留一把鎖</strong><p>系統與關鍵路徑固定保護。<br>每次修改前，再確認一次。</p><button id="protectionHelp">查看保護規則 <span>↗</span></button></div>
+      <button id="elevate" class="mode-button"><span class="mode-dot"></span><span id="modeLabel">一般模式</span><span class="mode-link">申請管理員 ↗</span></button>
+      <p id="modeHint" class="mode-hint" role="status">正在確認權限狀態…</p>
+      <button id="quit" class="quit-button">結束應用程式</button>
+    </div>
+  </aside>
+  <main data-screen-label="空間總覽">
+    <header class="topbar"><span>本機工作空間 <span class="top-sep">/</span> <strong id="topTitle">空間總覽</strong></span><div class="topbar-controls"><label class="language-control" data-i18n-skip><select id="languageSelect" aria-label="Interface language"><option value="en" selected>English</option><option value="zh-Hant">繁體中文</option></select></label><div class="local-pill"><span></span>只在你的電腦上運行</div></div></header>
+    <div class="workspace">
+      <section class="heading-row"><div><div class="eyebrow">A LITTLE ROOM TO BREATHE</div><h1 id="pageTitle">讓空間，回到你手中<span>。</span></h1><p id="pageDescription">看清每一份占用，再決定哪些值得留下。</p></div><button id="chooseFolder" class="button primary"><svg class="icon"><use href="#i-folder"></use></svg>選擇資料夾</button></section>
+      <div id="loadingStrip" class="loading-strip hidden" role="status" aria-live="polite"><span class="spinner"></span><strong id="loadingLabel">正在載入…</strong><span id="loadingElapsed"></span><button id="cancelLoading" class="text-button">取消等待</button></div>
+      <div class="path-toolbar"><svg class="icon"><use href="#i-disk"></use></svg><input id="pathInput" aria-label="完整掃描路徑" placeholder="輸入本機路徑，例如 C:\Users，或選擇左側磁碟" spellcheck="false"><label class="scan-workers" title="機械硬碟可選 1–2；SSD 可試 4；更多工作不保證更快">背景工作 <select id="scanWorkers" aria-label="掃描背景工作數"><option value="1">1</option><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option></select></label><button id="scanButton" class="button small">開始掃描 <svg class="icon"><use href="#i-arrow"></use></svg></button><button id="cancelButton" class="button small danger hidden">停止掃描</button></div>
+      <div id="notice" class="notice hidden" role="status"></div>
+      <div id="connectionNotice" class="connection-notice hidden" role="status"><strong id="connectionMessage"></strong><div><button id="reconnect" class="text-button">重新連線並重試此頁</button><button id="connectionDetails" class="text-button">查看連線紀錄</button></div></div>
+      <div id="viewNotice" class="notice hidden" role="status"></div>
+      <div id="scanHealth" class="scan-health hidden"><strong id="scanHealthTitle"></strong><span id="scanHealthText"></span><button id="scanIssues" class="text-button">查看原因與路徑</button></div>
+      <section id="progressPanel" class="progress-panel hidden" aria-live="polite"><div class="progress-top"><strong><span class="spinner"></span><span id="scanPhaseLabel">正在整理空間地圖</span></strong><span id="scanNumbers"></span></div><div class="indeterminate"><span></span></div><p id="scanCurrent"></p><small id="scanEngineLabel">掃描進度以已讀取項目呈現；檔案總數未知，不顯示估算百分比。</small></section>
+      <section class="stats-grid" aria-label="空間統計">
+        <article class="stat-card"><div class="stat-label">磁碟已使用 <svg class="icon"><use href="#i-disk"></use></svg></div><div class="stat-value" id="usedValue">— <small>GiB</small></div><div class="stat-foot" id="usedFoot">選擇磁碟後顯示</div><div class="mini-meter"><span id="usedBar"></span></div></article>
+        <article class="stat-card"><div class="stat-label">磁碟可用空間 <svg class="icon"><use href="#i-spark"></use></svg></div><div class="stat-value sage" id="freeValue">— <small>GiB</small></div><div class="stat-foot" id="freeFoot">每次管理操作後可重新整理</div><div class="stat-annotation">為接下來的想法，留一點餘裕</div></article>
+        <article class="stat-card"><div class="stat-label">本次已讀取大小 <svg class="icon"><use href="#i-folder"></use></svg></div><div class="stat-value" id="scannedValue">— <small>GiB</small></div><div class="stat-foot" id="scannedFoot">尚未開始掃描</div><div class="stat-annotation" id="scanTime">僅計算可讀取檔案的邏輯大小</div></article>
+        <article class="stat-card accent-card"><div class="stat-label">值得檢查的資料夾 <svg class="icon"><use href="#i-search"></use></svg></div><div class="stat-value" id="candidateValue">— <small>個</small></div><div class="stat-foot">依位置與名稱線索提出建議</div><button class="text-button" id="seeSuggestions">看看整理建議 <span>↗</span></button></article>
+      </section>
+      <div id="analysisArea">
+        <section class="analysis-grid">
+          <article class="panel map-panel"><div class="panel-header"><div><h2>空間分布</h2><p>面積代表大小，點選方塊查看內容</p></div><span class="subtle-pill">資料夾＋檔案</span></div><div id="breadcrumbs" class="breadcrumbs"><span>尚未選擇掃描範圍</span></div><div class="treemap" id="treemap"><div class="empty-map"><span class="empty-map-icon"><svg class="icon"><use href="#i-folder"></use></svg></span><strong>從一個資料夾開始</strong><p>選擇磁碟或資料夾，畫出你的空間地圖。</p><button id="emptyChoose" class="text-button">選擇掃描範圍 ↗</button></div></div><div class="map-footer"><span><i class="legend-dot clay"></i>一般資料</span><span><i class="legend-dot green"></i>建議檢查</span><span><i class="legend-dot gray"></i>固定保護</span><span class="map-total" id="mapTotal">尚無掃描資料</span></div></article>
+          <article class="panel detail-panel" id="detailPanel"><div class="panel-header"><h2>資料夾筆記</h2><svg class="icon"><use href="#i-info"></use></svg></div><div id="detailContent" class="detail-content"><div class="detail-illustration"><svg class="icon"><use href="#i-folder"></use></svg><span class="detail-leaf"></span></div><h3>每份資料，都有它的位置。</h3><p>選取一個項目，查看大小、清理建議與可用操作。</p><div class="detail-tip"><svg class="icon"><use href="#i-shield"></use></svg><span>保護判斷會結合路徑、已安裝程式紀錄與內容特徵；無法保證辨認所有重要資料。</span></div></div></article>
+        </section>
+        <section class="panel list-panel"><div class="panel-header list-header"><div><h2 id="listTitle">資料夾與檔案 <span id="rowCount" class="count-tag">0</span></h2><p id="listSubtitle">點資料夾名稱開啟；點右側按鈕查看詳情與管理操作</p></div><div class="list-tools"><label class="search-box"><svg class="icon"><use href="#i-search"></use></svg><input id="search" placeholder="搜尋名稱或路徑" aria-label="搜尋項目"></label><select id="sort" aria-label="排序方式"><option value="size">占用空間 · 大到小</option><option value="priority">清理建議 · 優先度</option><option value="name">名稱 · A 到 Z</option></select></div></div><div class="table-scroll"><table><thead><tr><th>名稱</th><th>占用空間</th><th>此層占比</th><th>整理建議</th><th>操作</th></tr></thead><tbody id="fileRows"><tr><td colspan="5" class="table-empty">掃描完成後，項目會顯示在這裡。</td></tr></tbody></table></div><div class="table-footer"><span id="tableStatus">尚未掃描</span><button id="moreRows" class="text-button hidden">顯示更多</button><span>邏輯大小 ≠ 實際可釋放空間</span></div></section>
+      </div>
+      <section id="historyArea" class="panel history-panel hidden"><div class="panel-header"><div><h2>操作紀錄</h2><p>本機保存最近的管理結果，包含未完成的操作。</p></div><button id="openRecycle" class="button small"><svg class="icon"><use href="#i-trash"></use></svg>開啟資源回收筒</button></div><div id="historyList"></div></section>
+      <footer class="workspace-footer"><span><svg class="icon"><use href="#i-shield"></use></svg> 系統保護始終啟用</span><span>Spacekeeper <i>·</i> 少一點擁擠，多一點餘地。</span><button id="connectionDetailsFooter">本機連線紀錄</button><button id="windowsCleanup">Windows 儲存空間設定 ↗</button></footer>
+    </div>
+  </main>
+  <dialog id="modal"><form id="modalForm"><div class="modal-top"><div id="modalIcon" class="modal-icon"></div><button type="button" id="closeModal" class="icon-button" aria-label="關閉"><svg class="icon"><use href="#i-close"></use></svg></button></div><h2 id="modalTitle"></h2><p id="modalDescription"></p><div id="modalFields"></div><p class="modal-error" id="modalError" role="alert"></p><div class="modal-actions"><button type="button" id="cancelModal" class="button">取消</button><button type="submit" id="confirmModal" class="button primary">確認</button></div></form></dialog>
+  <div id="toast" class="toast hidden" role="status"></div>
+</body>
+</html>
